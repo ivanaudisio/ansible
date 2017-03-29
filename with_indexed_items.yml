@@ -1,0 +1,45 @@
+---
+# To reference the values in name and path
+# we use item.1.name and item.1.path
+# item.1 become the index of the list
+#
+#ok: [localhost] => (item=(0, {u'path': u'c:\\temp\\folder', u'name': u'Git01'})) => {
+#     "item": [
+#        0,
+#        {
+#            "name": "Git01",
+#            "path": "c:\\temp\\folder"
+#        }
+#    ],
+#    "item.stdout": "VARIABLE IS NOT DEFINED!"
+#}
+#ok: [localhost] => (item=(1, {u'path': u'path', u'name': u'Git02'})) => {
+#    "item": [
+#        1,
+#        {
+#            "name": "Git02",
+#            "path": "path"
+#        }
+#    ],
+#    "item.stdout": "VARIABLE IS NOT DEFINED!"
+#}
+
+- hosts: all
+  vars:
+    lista:
+        - { name: 'Git01', path: 'c:\temp\folder' }
+        - { name: 'Git02', path: 'path' }
+
+  tasks:
+    - name: "generate groovy scripts"
+      template:
+        src: script.groovy.j2
+        dest: ./scripts/script{{ item.0 }}.groovy
+      with_indexed_items: "{{ lista }}"
+
+    - debug: var=item.stdout
+      with_indexed_items: "{{ lista }}"
+
+    - name: "run groovy"
+      shell: groovy ./scripts/script{{ item.0 }}.groovy
+      with_indexed_items: "{{ lista }}"
