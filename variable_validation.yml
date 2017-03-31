@@ -1,0 +1,26 @@
+---
+- hosts: all
+
+  vars:
+    http:
+    https: 9999
+    
+  tasks:
+    - name: "Validate that only one port has been entered "
+      fail: msg="please specifiy only one port protocol"
+      when: http|default(None)!=None and https|default(None)!=None
+    - name: "Validate that http port or https has been entered"
+      fail: msg="Missing configuration for jenkins port. Please asign a port to the corresponding procotocl (http/https)"
+      when: http|default(None)==None and https|default(None)==None
+    - name: "Asign -1 to https when http is defined"
+      set_fact:
+        https: "-1"
+      when: http|default(None)!=None and https|default(None)==None
+    - name: "Assign -1 to http when https is defined"
+      set_fact:
+        http: "-1"
+      when: https|default(None)!=None and http|default(None)==None
+    - debug:
+        msg: "HTTP: {{ http }}"
+    - debug:
+        msg: "HTTPS: {{ https }}"
